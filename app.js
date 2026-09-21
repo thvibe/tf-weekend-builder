@@ -297,6 +297,41 @@ function header(side){
 
   return 30+logoH+82;
 }
+/* The Original plate carries the team name in brush lettering baked into its
+   footer bar, so no code draws it. Cover just that stretch — between the two
+   dividers, inside the bar's rules — and set the player's name in its place;
+   the logo, dividers, tagline and border all survive untouched. Left blank,
+   the plate is left exactly as drawn. The bar's interior is flat black under
+   every accent (tintMagenta and the colour pass both leave near-black pixels
+   alone). A flat fill would still read as a patch, though — the bar carries a
+   sparse scratch texture, and a dead-flat rectangle sits visibly inside it. So
+   rebuild the strip from a text-free slice of the bar's own background, tiled
+   and mirrored alternately to break the repeat. That keeps the real grain and
+   tracks the accent for free, since the slice is lifted after the plate and
+   the colour pass have already been drawn. Geometry measured off the plate:
+   dividers at x199-202 and x681-684, bar rules at y1368-1370 and y1490-1492,
+   baked lettering x233-632. */
+const ORIG_FOOT={x0:205,x1:678,y0:1372,y1:1488,mid:441,cap:44,base:1430,
+                 srcX:636,srcW:42};
+function origFooterName(){
+  const s=v("pname"); if(!s) return;
+  const f=ORIG_FOOT, h=f.y1-f.y0;
+  const src=document.createElement("canvas");
+  src.width=f.srcW; src.height=h;
+  src.getContext("2d").drawImage(cv,f.srcX,f.y0,f.srcW,h,0,0,f.srcW,h);
+  for(let x=f.x0; x<f.x1; x+=f.srcW){
+    const w=Math.min(f.srcW,f.x1-x);
+    // random flip on both axes — alternating mirrors alone leaves a visible
+    // symmetry down the strip, which is exactly what we are hiding
+    const fx=Math.random()<0.5?-1:1, fy=Math.random()<0.5?-1:1;
+    ctx.save();
+    ctx.translate(fx<0?x+w:x, fy<0?f.y0+h:f.y0);
+    ctx.scale(fx,fy);
+    ctx.drawImage(src,0,0,w,h,0,0,w,h);
+    ctx.restore();
+  }
+  txtFit(s,700,f.cap,f.x1-f.x0-46,f.mid,f.base+f.cap/2,WHITE,6,"center");
+}
 function footer(){
   const y=H-92;
   ctx.strokeStyle=accent; ctx.lineWidth=3;
@@ -605,6 +640,7 @@ function render(){
       const f=fit(W0,AVAIL*0.62,1.9,16,list);
       drawStats(L0,TOP+(AVAIL-f.nat)/2,W0,list);
     }
+    origFooterName();
     return;
   }
 
