@@ -17,8 +17,14 @@ Assets in `public/`: `photo-a.jpg`, `photo-b.jpg` (default photos),
 `grunge.jpg` (texture), `logo.png` (TF mark), `brush.png` (banner brush alpha
 mask), `original-plate.jpg` (the "Original" poster backdrop).
 
-No build step and no dependencies. Font is Oswald (Google Fonts) with an
-Arial Narrow fallback.
+Fonts in `public/fonts/`: `oswald-{latin,latin-ext,vietnamese,cyrillic,cyrillic-ext}.woff2`.
+
+Oswald is served from `public/fonts/` rather than Google Fonts, so the page has
+no network dependencies at all. One variable file per unicode range; the
+browser fetches only the range it needs (21 KB for latin). Arial Narrow remains
+the fallback, but it should now only ever appear if a font file is missing.
+
+No build step and no dependencies.
 
 ## Running it locally
 

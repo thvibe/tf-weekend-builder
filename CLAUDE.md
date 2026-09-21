@@ -12,7 +12,11 @@ Hosted target: Vercel, repo `thvibe/tf-weekend-builder`.
   constants at the top of the `<script>`: `PH_A`, `PH_B` (default photos),
   `GRUNGE` (texture), `LOGO` (TF mark), `BRUSH` (banner brush alpha mask),
   `ORIG` (the full "Original" poster backdrop with stat panels removed).
-- All rendering is canvas 2D. Font: Oswald (Google Fonts) with Arial Narrow fallback.
+- All rendering is canvas 2D. Font: Oswald, self-hosted from `public/fonts/`
+  (one variable woff2 per unicode range), with an Arial Narrow fallback. It is
+  deliberately not loaded from Google Fonts: the canvas measures every string
+  to lay itself out, so a font that fails to arrive does not degrade the
+  poster, it changes it — Arial Narrow runs about 23% wider than Oswald.
 - No build step, no dependencies.
 
 ## First tasks
