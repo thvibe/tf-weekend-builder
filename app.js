@@ -345,7 +345,9 @@ function origFooterName(){
     ctx.drawImage(src,0,0,w,h,0,0,w,h);
     ctx.restore();
   }
-  txtFit(s,700,f.cap,f.x1-f.x0-46,f.mid,f.base+f.cap/2,WHITE,6,"center");
+  // left-ranged to match the drawn footer; x0+26 lands where the baked
+  // lettering used to start, just clear of the divider at x199-202
+  txtFit(s,700,f.cap,f.x1-20-(f.x0+26),f.x0+26,f.base+f.cap/2,WHITE,6,"left");
 }
 /* backing: the Original layouts in 4:5 lose the plate's dark bottom margin
    along with its baked bar, so the footer lands on the photo. Everything else
@@ -356,18 +358,25 @@ function footer(backing){
   ctx.strokeStyle=accent; ctx.lineWidth=3;
   ctx.strokeRect(M+1.5,y+1.5,W-2*M-3,70-3);
   const logo=imgs.logo;
-  if(logo){const h=34,w=h*(logo.width/logo.height);ctx.drawImage(logo,M+22,y+18,w,h);}
+  let nameX=M+22;   // where the name starts if the logo has not loaded
+  if(logo){
+    const h=34,w=h*(logo.width/logo.height);
+    ctx.drawImage(logo,M+22,y+18,w,h);
+    nameX=M+22+w+34;
+  }
   /* The bottom bar carries the player's name; falling back to the team keeps
      the bar from reading as a gap when the field is cleared. The team name
      still sits under the logo up top either way.
      Set at 32 rather than 20 — it is the one piece of the poster that names
      who it is about, and at 20 it read smaller than the stat labels. 700 is
-     already the heaviest Oswald loaded, so size is the only lever. The budget
-     goes to 360, using some of the dead space toward the logo; it still stops
-     26px clear of the tagline at any name length, since txtFit shrinks past
-     that. Baseline follows the cap to stay centred in the 70px bar. */
-  txtFit(v("pname")||"TEAM FRANCISCO",700,32,360,W/2,y+51,WHITE,6,"center");
-  txtFit("PLAY HARD  ·  PLAY TOGETHER",600,13,250,W-M-24,y+43,accent,4,"right");
+     already the heaviest Oswald loaded, so size is the only lever.
+     Ranged off the logo rather than centred in the bar, so it reads as one
+     lockup with the mark instead of floating. Its budget runs to 28px short
+     of the tagline, which is measured from the same constant the tagline is
+     placed by, so the two cannot drift into each other. */
+  const TAG_W=250, tagLeft=W-M-24-TAG_W;
+  txtFit(v("pname")||"TEAM FRANCISCO",700,32,tagLeft-28-nameX,nameX,y+51,WHITE,6,"left");
+  txtFit("PLAY HARD  ·  PLAY TOGETHER",600,13,TAG_W,W-M-24,y+43,accent,4,"right");
 }
 
 /* ---------- stat sections ---------- */
