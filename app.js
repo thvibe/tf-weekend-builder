@@ -388,6 +388,15 @@ function statsHeight(w,list){
   const parts=(list||ALL_SECTIONS).map(n=>sectionH(n,w)).filter(p=>p>0);
   return parts.reduce((a,b)=>a+b,0)+12*(parts.length-1);
 }
+/* Natural stack height for a column of width w, measured against w's own type
+   size. sectionH() derives box heights from BT, and BT is only refreshed
+   inside fit() — so a layout that pre-measures the stack to work out how much
+   room to hand the photos must refresh BT first, or it measures with whatever
+   column width the previously drawn layout happened to use. */
+function naturalHeight(w,list){
+  BT=baseType(w);
+  return statsHeight(w,list);
+}
 /* Fit the stack to the space it is given: a little stretch, then spend the
    rest on gaps between boxes rather than inflating the boxes. */
 function fit(w,avail,maxStretch,maxExtraGap,list){
@@ -592,7 +601,7 @@ function render(){
   else if(layout==="topPhoto"||layout==="bottomPhoto"){
     // give the stats exactly what they need, hand the rest to the photos
     SC=1;
-    const nat=statsHeight(innerW);
+    const nat=naturalHeight(innerW);
     let ph=bodyH-nat-GAP;
     ph=Math.max(Math.round(bodyH*0.34),Math.min(Math.round(bodyH*0.56),ph));
     const availS=bodyH-ph-GAP;
@@ -607,7 +616,7 @@ function render(){
   }
   else if(layout==="hero"){
     SC=1;
-    const nat=statsHeight(innerW);
+    const nat=naturalHeight(innerW);
     let ph=bodyH-nat-GAP;
     ph=Math.max(Math.round(bodyH*0.36),Math.min(Math.round(bodyH*0.58),ph));
     const availS=bodyH-ph-GAP;
@@ -633,7 +642,7 @@ function render(){
   else if(layout==="band"){
     const sw=Math.round(innerW*0.58), bw=innerW-sw-GAP;
     SC=1;
-    const nat=statsHeight(sw);
+    const nat=naturalHeight(sw);
     let ph=bodyH-nat-GAP;
     ph=Math.max(Math.round(bodyH*0.24),Math.min(Math.round(bodyH*0.44),ph));
     const rest=bodyH-ph-GAP;
