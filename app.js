@@ -171,6 +171,15 @@ function txtFit(s,weight,cap,maxW,x,baseline,color,tracking,align){
   if(w>maxW && w>0){ const k=maxW/w; c*=k; tr*=k; }
   txt(s,weight,c,x,baseline,color,tr,align);
 }
+/* Like txtFit, but centred in a band instead of sitting on a baseline picked
+   as a fraction of it. A fraction only centres at one particular cap size, so
+   it quietly goes wrong the moment the type is resized. Fit first, then place,
+   so a string that had to shrink still lands in the middle. */
+function txtFitMid(s,weight,cap,maxW,x,midY,color,tracking,align){
+  if(!s) return;
+  const k=fitRatio(s,weight,cap,maxW,tracking||0), c=cap*k;
+  txt(s,weight,c,x,midY+c/2,color,(tracking||0)*k,align);
+}
 function pairW(val,lab,bigCap,smallCap,gap){
   const sB=setF(val,700,bigCap), wB=val?ctx.measureText(val).width:0;
   const sS=setF(lab,700,smallCap), wS=lab?ctx.measureText(lab).width:0;
@@ -378,8 +387,8 @@ function panel(x,y,w,h,hdr,st){
   if(hdr){
     const hh=Math.min(38,h*0.3);
     ctx.fillStyle=st.on?deep(accent,0.055,0.94):accent; ctx.fillRect(x,y,w,hh);
-    txtFit(hdr,600,Math.min(20,hh*0.52),w-26,x+w/2,y+hh*0.70,
-           st.on?st.fill:inkOn(accent),4,"center");
+    txtFitMid(hdr,600,Math.min(20,hh*0.52),w-26,x+w/2,y+hh/2,
+              st.on?st.fill:inkOn(accent),4,"center");
     return y+hh;
   }
   return y;
@@ -521,8 +530,8 @@ function drawTeam(x,y,w){
   ctx.fillStyle=st.fill; ctx.fillRect(x,y,w,h);
   ctx.strokeStyle=st.line; ctx.lineWidth=3; ctx.strokeRect(x+1.5,y+1.5,w-3,h-3);
   ctx.fillStyle=st.on?deep(accent,0.055,0.94):accent; ctx.fillRect(x,y,w,hh);
-  txtFit("T E A M   R E S U L T S",600,Math.min(26,hh*0.66),w-26,x+w/2,y+hh*0.72,
-         st.on?st.fill:inkOn(accent),4,"center");
+  txtFitMid("T E A M   R E S U L T S",600,Math.min(26,hh*0.66),w-26,x+w/2,y+hh/2,
+            st.on?st.fill:inkOn(accent),4,"center");
   const top=y+hh, mid=x+w/2;
   ctx.fillStyle=st.on?st.val:accent; ctx.fillRect(mid-1,top+10,2,y+h-top-20);
   const cA=x+w/4, cB=x+w*0.75;
@@ -536,8 +545,8 @@ function drawTeam(x,y,w){
 function drawHdr(x,y,w){
   const h=S(HDR_H), st=boxStyle("hdr");
   ctx.fillStyle=st.on?st.fill:accent; ctx.fillRect(x,y,w,h);
-  txtFit(v("phdr"),600,Math.min(26,h*0.66),w-28,x+w/2,y+h*0.72,
-         inkOn(st.on?st.fill:accent),4,"center");
+  txtFitMid(v("phdr"),600,Math.min(26,h*0.66),w-28,x+w/2,y+h/2,
+            inkOn(st.on?st.fill:accent),4,"center");
   return h;
 }
 function drawRate(x,y,w){
