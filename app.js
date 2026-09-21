@@ -36,7 +36,8 @@ const el={}; ids.forEach(i=>el[i]=document.getElementById(i));
 const ckBorder=document.getElementById("photoBorder");
 const ckMirror=document.getElementById("mirror"),
       ckTeam=document.getElementById("showTeam"),
-      ckBan=document.getElementById("showBanner");
+      ckBan=document.getElementById("showBanner"),
+      ckCnt=document.getElementById("showCnt");
 const v=id=>(el[id].value||"").trim();
 
 /* ---------- colour ---------- */
@@ -418,6 +419,7 @@ function sectionH(name,w){
   if(name==="rate") return cellsOf(RATE).length ? box : 0;
   if(name==="ban")  return (ckBan.checked && v("ban")) ? 74 : 0;
   if(name==="cnt"){
+    if(!ckCnt.checked) return 0;
     const n=cellsOf(CNT).length; if(!n) return 0;
     const rowH=Math.round(b.cap+PAD_V-4);   // 20px above and below the figure
     return w<430 ? Math.ceil(n/2)*rowH+12 : rowH;
@@ -532,6 +534,7 @@ function drawBan(x,y,w){
   return h;
 }
 function drawCnt(x,y,w){
+  if(!ckCnt.checked) return 0;
   const c=cellsOf(CNT); if(!c.length) return 0;
   const st=boxStyle("cnt"), h=S(sectionH("cnt",w));
   if(w<430){
@@ -776,7 +779,7 @@ mark();
 });
 
 ids.forEach(i=>el[i].addEventListener("input",render));
-[ckMirror,ckTeam,ckBan,ckBorder,hiT].forEach(c=>c.addEventListener("change",render));
+[ckMirror,ckTeam,ckBan,ckCnt,ckBorder,hiT].forEach(c=>c.addEventListener("change",render));
 hiC.addEventListener("input",render);
 document.getElementById("clr").addEventListener("click",()=>{
   ["t1v","t2v","a1v","a2v","a3v","ban","b1v","b2v","b3v","b4v"].forEach(i=>el[i].value="");
