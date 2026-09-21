@@ -9,8 +9,8 @@ const W=1024, M=34;
 /* 4:5 is the tallest shape Instagram shows uncropped in the feed; 2:3 is the
    original poster proportion. Only the height changes — everything is laid out
    from W and H, so the generic layouts reflow on their own. */
-const FORMATS=[["poster","Poster 2:3",1536],["post","Post 4:5",1280]];
-let fmt="poster", H=1536;
+const FORMATS=[["post","Post 4:5",1280],["poster","Poster 2:3",1536]];
+let fmt="post", H=1280;   // the tool makes Instagram posts; 2:3 is the print shape
 const WHITE="#f2f2f2", INK_D="#0a080a", INK_L="#fdfafd";
 const PRESETS=[["Neon Pink","#e821a0"],["Cyan","#12c8e6"],["Volt","#57d80e"],
   ["Orange","#f2711c"],["Crimson","#e8203c"],["Violet","#9333ea"],["Gold","#e0a010"]];

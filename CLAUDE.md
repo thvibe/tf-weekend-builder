@@ -1,8 +1,11 @@
 # Team Francisco — Weekend Graphic Builder
 
-Single-page tool for making a weekly social graphic (1024×1536 PNG) of a youth
-baseball player's weekend stats. Owner: Jonathan (product designer — expect
-precise visual feedback). Hosted target: Vercel, repo `thvibe/tf-weekend-builder`.
+Single-page tool for making a weekly social graphic of a youth baseball
+player's weekend stats. Two formats, chosen in the Layout tab: **Post 4:5**
+(1024×1280, the default — the tallest shape Instagram shows uncropped in the
+feed) and **Poster 2:3** (1024×1536, the original print proportion).
+Owner: Jonathan (product designer — expect precise visual feedback).
+Hosted target: Vercel, repo `thvibe/tf-weekend-builder`.
 
 ## Current state
 - Everything lives in `index.html` (~1.2 MB). Images are base64 data URIs in
@@ -30,8 +33,11 @@ precise visual feedback). Hosted target: Vercel, repo `thvibe/tf-weekend-builder
 - **Original family** (Jonathan's favourite — keep these): `original`,
   `origTall`, `origCompact`, `origSplit`, `origBanner`, `origLine`.
   Draw the `ORIG` plate full-bleed, then the stat stack in a left column at
-  x=35, width=601, inside y=748..1348. These cannot mirror (type is baked into
-  the plate) — Flip and Photo-border toggles are disabled for them.
+  x=35, width=601, starting at y=748 (running to 1348 at 2:3, 1146 at 4:5).
+  The plate is baked at 2:3, so at 4:5 it is scaled to the width and anchored
+  at the top — which crops its baked footer bar, and `footer()` draws instead.
+  These cannot mirror (type is baked into the plate) — Flip and Photo-border
+  toggles are disabled for them.
 - **Generic layouts** (`columns`, `topPhoto`, `bottomPhoto`, `hero`,
   `spotlight`, `band`): Jonathan was lukewarm on these. He intends to choose
   which to keep — don't delete without asking. These support Flip; header puts
