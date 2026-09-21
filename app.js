@@ -30,7 +30,7 @@ const cv=document.getElementById("cv"), ctx=cv.getContext("2d",{willReadFrequent
 const imgs={};
 let ready=0, needed=6;
 
-const ids=["h1","h2","t1v","t1l","t2v","t2l","phdr","a1v","a1l","a2v","a2l","a3v","a3l","ban",
+const ids=["h1","h2","t1v","t1l","t2v","t2l","pname","phdr","a1v","a1l","a2v","a2l","a3v","a3l","ban",
   "b1v","b1l","b2v","b2l","b3v","b3l","b4v","b4l"];
 const el={}; ids.forEach(i=>el[i]=document.getElementById(i));
 const ckBorder=document.getElementById("photoBorder");
@@ -303,7 +303,10 @@ function footer(){
   ctx.strokeRect(M+1.5,y+1.5,W-2*M-3,70-3);
   const logo=imgs.logo;
   if(logo){const h=34,w=h*(logo.width/logo.height);ctx.drawImage(logo,M+22,y+18,w,h);}
-  txtFit("TEAM FRANCISCO",700,20,340,W/2,y+44,WHITE,6,"center");
+  /* The bottom bar carries the player's name; falling back to the team keeps
+     the bar from reading as a gap when the field is cleared. The team name
+     still sits under the logo up top either way. */
+  txtFit(v("pname")||"TEAM FRANCISCO",700,20,340,W/2,y+44,WHITE,6,"center");
   txtFit("PLAY HARD  ·  PLAY TOGETHER",600,13,250,W-M-24,y+43,accent,4,"right");
 }
 
