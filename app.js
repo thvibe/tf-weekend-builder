@@ -5,7 +5,12 @@ const LOGO="public/logo.png";
 const BRUSH="public/brush.png";
 const ORIG="public/original-plate.jpg";
 
-const W=1024, H=1536, M=34;
+const W=1024, M=34;
+/* 4:5 is the tallest shape Instagram shows uncropped in the feed; 2:3 is the
+   original poster proportion. Only the height changes — everything is laid out
+   from W and H, so the generic layouts reflow on their own. */
+const FORMATS=[["poster","Poster 2:3",1536],["post","Post 4:5",1280]];
+let fmt="poster", H=1536;
 const WHITE="#f2f2f2", INK_D="#0a080a", INK_L="#fdfafd";
 const PRESETS=[["Neon Pink","#e821a0"],["Cyan","#12c8e6"],["Volt","#57d80e"],
   ["Orange","#f2711c"],["Crimson","#e8203c"],["Violet","#9333ea"],["Gold","#e0a010"]];
@@ -333,8 +338,12 @@ function origFooterName(){
   }
   txtFit(s,700,f.cap,f.x1-f.x0-46,f.mid,f.base+f.cap/2,WHITE,6,"center");
 }
-function footer(){
+/* backing: the Original layouts in 4:5 lose the plate's dark bottom margin
+   along with its baked bar, so the footer lands on the photo. Everything else
+   already sits on the dark field and passes nothing, leaving it untouched. */
+function footer(backing){
   const y=H-92;
+  if(backing){ ctx.fillStyle=deep(accent,0.05,0.72); ctx.fillRect(M,y,W-2*M,70); }
   ctx.strokeStyle=accent; ctx.lineWidth=3;
   ctx.strokeRect(M+1.5,y+1.5,W-2*M-3,70-3);
   const logo=imgs.logo;
@@ -471,7 +480,13 @@ function fit(w,avail,maxStretch,maxExtraGap,list){
   BT=baseType(w);
   const nat=statsHeight(w,list);
   if(!nat){ return {nat:0,left:avail}; }
-  SC=Math.max(1,Math.min(maxStretch||1.25, avail/nat, widthHeadroom(w)));
+  /* Grow as before when there is room. When there is not, the 4:5 canvas
+     compresses rather than letting the stack run past its space. 2:3 keeps the
+     old floor of 1: origCompact and origSplit allot the stack less than its
+     natural height and have always been tuned around creeping upward instead,
+     so shrinking there would move type the poster has already been signed off on. */
+  const grow=Math.min(maxStretch||1.25, avail/nat, widthHeadroom(w));
+  SC = grow>=1 ? grow : (fmt==="post" ? Math.max(0.72, avail/nat) : 1);
   let used=nat*SC;
   const n=sectionCount(w,list);
   const gapRoom=(maxExtraGap===undefined?26:maxExtraGap);
@@ -601,14 +616,21 @@ function render(){
 
   if(ORIG_FAMILY.indexOf(layout)>=0){
     const plate=tinted.orig||imgs.orig;
-    if(plate) ctx.drawImage(plate,0,0,W,H);
+    /* The plate is baked at 2:3. Scale it to the width and show the top of
+       it, rather than squashing it to a shorter canvas — 4:5 therefore loses
+       the baked footer bar, which footer() draws instead. */
+    if(plate){
+      const sh=Math.min(plate.height, H*plate.width/W);
+      ctx.drawImage(plate,0,0,plate.width,sh,0,0,W,sh*W/plate.width);
+    }
     ctx.save();                       // pull the whole field toward the accent
     ctx.globalCompositeOperation="color";
     ctx.globalAlpha=.34;
     ctx.fillStyle=accent; ctx.fillRect(0,0,W,H);
     ctx.restore();
 
-    const L0=35, W0=601, TOP=748, AVAIL=600;
+    const L0=35, W0=601, TOP=748;
+    const AVAIL = fmt==="poster" ? 600 : H-110-24-TOP;
 
     if(layout==="original"){
       const f=fit(W0,AVAIL,1.3,0,ALL_SECTIONS);
@@ -634,7 +656,10 @@ function render(){
       }
       const usedTop=ckTeam.checked?S(126)+26:0;
       const fp=fit(W0,AVAIL-usedTop-24,1.3,12,pList);
-      drawStats(L0,TOP+AVAIL-fp.nat,W0,pList);
+      /* Anchored at the bottom, but never allowed to ride up into the team box
+         above it — on the shorter 4:5 canvas the two would otherwise collide.
+         A no-op at 2:3, where there is room to spare between them. */
+      drawStats(L0,Math.max(TOP+usedTop,TOP+AVAIL-fp.nat),W0,pList);
     }
     else if(layout==="origBanner"){
       // banner leads, no team box
@@ -648,7 +673,7 @@ function render(){
       const f=fit(W0,AVAIL*0.62,1.9,16,list);
       drawStats(L0,TOP+(AVAIL-f.nat)/2,W0,list);
     }
-    origFooterName();
+    if(fmt==="poster") origFooterName(); else footer(true);
     return;
   }
 
@@ -735,6 +760,17 @@ function syncControls(){
     if(lab) lab.classList.toggle("off",!enabled);
   });
 }
+const fmtWrap=document.getElementById("fmt");
+FORMATS.forEach(([id,label,height])=>{
+  const b=document.createElement("button");
+  b.className="lb"+(id===fmt?" on":""); b.textContent=label; b.dataset.id=id;
+  b.addEventListener("click",()=>{
+    fmt=id; H=height; cv.height=H;
+    [...fmtWrap.children].forEach(c=>c.classList.toggle("on",c.dataset.id===fmt));
+    render();
+  });
+  fmtWrap.appendChild(b);
+});
 const layWrap=document.getElementById("lay");
 LAYOUTS.forEach(([id,label])=>{
   const b=document.createElement("button");
