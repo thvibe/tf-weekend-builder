@@ -764,6 +764,8 @@ function render(){
 
 /* ---------- controls ---------- */
 /* Some layouts have nothing to flip or frame — grey those controls out. */
+const PHOTO_NOTE="Your photos keep their own colour — only the artwork around them picks up the accent.";
+const PHOTO_NOTE_ORIG="The Original layouts use the photos baked into the artwork, so an upload will not show there. Pick one of the other six to use your own.";
 function syncControls(){
   const hasPhotos = ORIG_FAMILY.indexOf(layout)<0;
   [[ckMirror,hasPhotos],[ckBorder,hasPhotos]].forEach(([c,enabled])=>{
@@ -771,6 +773,15 @@ function syncControls(){
     const lab=c.closest(".ck");
     if(lab) lab.classList.toggle("off",!enabled);
   });
+  /* Same rule as those two: the Original plate carries its own photos, so the
+     drop zones cannot do anything there. They used to accept the file and
+     report "Swapped" while the poster never changed. */
+  ["d1","d2"].forEach(id=>{
+    const d=document.getElementById(id);
+    if(d) d.classList.toggle("off",!hasPhotos);
+  });
+  const note=document.getElementById("photoNote");
+  if(note) note.textContent = hasPhotos ? PHOTO_NOTE : PHOTO_NOTE_ORIG;
 }
 const fmtWrap=document.getElementById("fmt");
 FORMATS.forEach(([id,label,height])=>{
@@ -816,7 +827,7 @@ mark();
 
 [["d1","f1","A"],["d2","f2","B"]].forEach(([dId,fId,key])=>{
   const drop=document.getElementById(dId), file=document.getElementById(fId);
-  drop.addEventListener("click",()=>file.click());
+  drop.addEventListener("click",()=>{ if(!drop.classList.contains("off")) file.click(); });
   file.addEventListener("change",()=>{
     const f=file.files&&file.files[0]; if(!f) return;
     const url=URL.createObjectURL(f), im=new Image();
