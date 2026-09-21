@@ -376,7 +376,12 @@ let SC=1;                  // vertical stretch applied to the stat stack
 let GX=0;                  // extra breathing room between sections
 const S=n=>Math.round(n*SC);
 
-/* One type size for the whole stack, derived from the rate row and then
+/* Sizes are floored for a phone feed, not a print sheet: a 1024-wide poster
+   shows about 390pt wide in the Instagram timeline, so anything under ~2.5% of
+   the width lands below 10pt and stops being readable. Labels and section
+   headers are set against that floor. Nothing moves — the header bars keep
+   their height and the type just stops being capped at half of it.
+   One type size for the whole stack, derived from the rate row and then
    checked against the team box so both read as the same set of numbers.
    Panel heights are built FROM this size, so boxes hug their contents. */
 let BT={cap:70,lab:20};
@@ -386,7 +391,7 @@ const HDR_H=38;
 
 function baseType(w){
   const cR=cellsOf(RATE), nR=cR.length||3, seg=w/nR;
-  let lab=Math.max(14,Math.min(22,w*0.033));
+  let lab=Math.max(18,Math.min(26,w*0.040));
   let cap=Math.max(18,Math.min(seg*0.46,96));
   let kv=1,kl=1;
   cR.forEach(p=>{
@@ -481,7 +486,7 @@ function drawTeam(x,y,w){
   ctx.fillStyle=st.fill; ctx.fillRect(x,y,w,h);
   ctx.strokeStyle=st.line; ctx.lineWidth=3; ctx.strokeRect(x+1.5,y+1.5,w-3,h-3);
   ctx.fillStyle=st.on?deep(accent,0.055,0.94):accent; ctx.fillRect(x,y,w,hh);
-  txtFit("T E A M   R E S U L T S",600,Math.min(19,hh*0.50),w-26,x+w/2,y+hh*0.70,
+  txtFit("T E A M   R E S U L T S",600,Math.min(26,hh*0.66),w-26,x+w/2,y+hh*0.72,
          st.on?st.fill:inkOn(accent),4,"center");
   const top=y+hh, mid=x+w/2;
   ctx.fillStyle=st.on?st.val:accent; ctx.fillRect(mid-1,top+10,2,y+h-top-20);
@@ -496,7 +501,7 @@ function drawTeam(x,y,w){
 function drawHdr(x,y,w){
   const h=S(HDR_H), st=boxStyle("hdr");
   ctx.fillStyle=st.on?st.fill:accent; ctx.fillRect(x,y,w,h);
-  txtFit(v("phdr"),600,Math.min(22,h*0.52),w-28,x+w/2,y+h*0.70,
+  txtFit(v("phdr"),600,Math.min(26,h*0.66),w-28,x+w/2,y+h*0.72,
          inkOn(st.on?st.fill:accent),4,"center");
   return h;
 }
