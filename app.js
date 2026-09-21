@@ -397,6 +397,11 @@ const S=n=>Math.round(n*SC);
 let BT={cap:70,lab:20};
 let ST={cap:70,lab:20};
 const PAD_V=44;            // even breathing room above/below the numbers
+/* Side room inside each rate cell. At 20 a bound value cleared its divider by
+   about 10px, which reads as jammed in the narrow columns — the value filled
+   the cell almost edge to edge. Used for both the size baseType() fits to and
+   the ceiling widthHeadroom() enforces, so the two cannot drift apart. */
+const RATE_PAD=32;
 const HDR_H=38;
 
 function baseType(w){
@@ -405,7 +410,7 @@ function baseType(w){
   let cap=Math.max(18,Math.min(seg*0.46,96));
   let kv=1,kl=1;
   cR.forEach(p=>{
-    kv=Math.min(kv,fitRatio(v(p[0]),700,cap,seg-20,0));
+    kv=Math.min(kv,fitRatio(v(p[0]),700,cap,seg-RATE_PAD,0));
     kl=Math.min(kl,fitRatio(v(p[1]),700,lab,seg-14,1.6));
   });
   cap*=kv; lab*=kl;
@@ -463,7 +468,7 @@ function widthHeadroom(w){
   const budget=(width,max)=>{ if(width>0) k=Math.min(k,max/width); };
   const cR=cellsOf(RATE), seg=w/(cR.length||3);
   cR.forEach(p=>{
-    budget(measW(v(p[0]),700,BT.cap,0),   seg-20);
+    budget(measW(v(p[0]),700,BT.cap,0),   seg-RATE_PAD);
     budget(measW(v(p[1]),700,BT.lab,1.6), seg-14);
   });
   if(ckTeam.checked){
@@ -480,13 +485,20 @@ function fit(w,avail,maxStretch,maxExtraGap,list){
   BT=baseType(w);
   const nat=statsHeight(w,list);
   if(!nat){ return {nat:0,left:avail}; }
-  /* Grow as before when there is room. When there is not, the 4:5 canvas
-     compresses rather than letting the stack run past its space. 2:3 keeps the
-     old floor of 1: origCompact and origSplit allot the stack less than its
-     natural height and have always been tuned around creeping upward instead,
-     so shrinking there would move type the poster has already been signed off on. */
-  const grow=Math.min(maxStretch||1.25, avail/nat, widthHeadroom(w));
-  SC = grow>=1 ? grow : (fmt==="post" ? Math.max(0.72, avail/nat) : 1);
+  /* U is the ceiling that has nothing to do with vertical space: how far the
+     type may stretch before it outgrows its cells. R is what the space allows.
+     Never exceed U — the earlier form dropped it whenever it fell below 1 and
+     fell back to R, which let a short stack in a tall column scale past both
+     ceilings and run the values straight over their dividers. widthHeadroom
+     lands a hair under 1 on a cell that is exactly bound, so that was one
+     rounding error away from firing on its own.
+     4:5 may compress to fit; 2:3 keeps the old floor of 1, since origCompact
+     and origSplit allot the stack less than its natural height and have always
+     been tuned around creeping upward instead. */
+  const U=Math.min(maxStretch||1.25, widthHeadroom(w));
+  const R=avail/nat;
+  SC = fmt==="post" ? Math.min(U, Math.max(0.72, Math.min(U,R)))
+                    : Math.max(1, Math.min(U, R));
   let used=nat*SC;
   const n=sectionCount(w,list);
   const gapRoom=(maxExtraGap===undefined?26:maxExtraGap);
