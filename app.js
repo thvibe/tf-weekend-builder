@@ -350,8 +350,14 @@ function footer(backing){
   if(logo){const h=34,w=h*(logo.width/logo.height);ctx.drawImage(logo,M+22,y+18,w,h);}
   /* The bottom bar carries the player's name; falling back to the team keeps
      the bar from reading as a gap when the field is cleared. The team name
-     still sits under the logo up top either way. */
-  txtFit(v("pname")||"TEAM FRANCISCO",700,20,340,W/2,y+44,WHITE,6,"center");
+     still sits under the logo up top either way.
+     Set at 32 rather than 20 — it is the one piece of the poster that names
+     who it is about, and at 20 it read smaller than the stat labels. 700 is
+     already the heaviest Oswald loaded, so size is the only lever. The budget
+     goes to 360, using some of the dead space toward the logo; it still stops
+     26px clear of the tagline at any name length, since txtFit shrinks past
+     that. Baseline follows the cap to stay centred in the 70px bar. */
+  txtFit(v("pname")||"TEAM FRANCISCO",700,32,360,W/2,y+51,WHITE,6,"center");
   txtFit("PLAY HARD  ·  PLAY TOGETHER",600,13,250,W-M-24,y+43,accent,4,"right");
 }
 
