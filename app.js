@@ -534,13 +534,28 @@ function fit(w,avail,maxStretch,maxExtraGap,list){
   return {nat:used,left:Math.max(0,avail-used)};
 }
 
+/* The two header bars read as a pair, so they share a size. Fitting them
+   independently would break that the moment the player header is edited to
+   something long: it would shrink and the Team Results bar would not. Fit both
+   to whichever string is tighter instead, and letterspace both the same. The
+   team string used to carry a literal space between every letter, which made
+   it look lighter and wider than its neighbour at identical settings — the
+   spacing is tracking now, so the two are set the same way. */
+const HDR_TXT="TEAM RESULTS", HDR_TR=8;
+function headerType(barH,w){
+  const nom=Math.min(26,barH*0.66);
+  const k=Math.min(ckTeam.checked?fitRatio(HDR_TXT,600,nom,w-26,HDR_TR):1,
+                   fitRatio(v("phdr"),600,nom,w-28,HDR_TR));
+  return {cap:nom*k, tr:HDR_TR*k};
+}
 function drawTeam(x,y,w){
   const h=S(sectionH("team",w)), hh=S(HDR_H), st=boxStyle("team");
   ctx.fillStyle=st.fill; ctx.fillRect(x,y,w,h);
   ctx.strokeStyle=st.line; ctx.lineWidth=3; ctx.strokeRect(x+1.5,y+1.5,w-3,h-3);
   ctx.fillStyle=st.on?deep(accent,0.055,0.94):accent; ctx.fillRect(x,y,w,hh);
-  txtFitMid("T E A M   R E S U L T S",600,Math.min(26,hh*0.66),w-26,x+w/2,y+hh/2,
-            st.on?st.fill:inkOn(accent),4,"center");
+  const ht=headerType(hh,w);
+  txtFitMid(HDR_TXT,600,ht.cap,w-26,x+w/2,y+hh/2,
+            st.on?st.fill:inkOn(accent),ht.tr,"center");
   const top=y+hh, mid=x+w/2;
   ctx.fillStyle=st.on?st.val:accent; ctx.fillRect(mid-1,top+10,2,y+h-top-20);
   const cA=x+w/4, cB=x+w*0.75;
@@ -554,8 +569,9 @@ function drawTeam(x,y,w){
 function drawHdr(x,y,w){
   const h=S(HDR_H), st=boxStyle("hdr");
   ctx.fillStyle=st.on?st.fill:accent; ctx.fillRect(x,y,w,h);
-  txtFitMid(v("phdr"),600,Math.min(26,h*0.66),w-28,x+w/2,y+h/2,
-            inkOn(st.on?st.fill:accent),4,"center");
+  const ht=headerType(h,w);
+  txtFitMid(v("phdr"),600,ht.cap,w-28,x+w/2,y+h/2,
+            inkOn(st.on?st.fill:accent),ht.tr,"center");
   return h;
 }
 function drawRate(x,y,w){
