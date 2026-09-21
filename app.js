@@ -397,6 +397,28 @@ function naturalHeight(w,list){
   BT=baseType(w);
   return statsHeight(w,list);
 }
+/* How far the stack may stretch before the numbers outgrow their cells.
+   SC scales a type size, so glyphs grow sideways as well as up — the width
+   budgets baseType() just fitted to have to survive the stretch too, or the
+   values ride over their dividers and the panel edge. Mirrors baseType()'s
+   budgets exactly; the rate row and the team box draw with txt() and have no
+   clamp of their own (drawCnt does its own fitting). Tracking is left out of
+   the scaling, which only ever errs tighter. */
+function widthHeadroom(w){
+  let k=Infinity;
+  const budget=(width,max)=>{ if(width>0) k=Math.min(k,max/width); };
+  const cR=cellsOf(RATE), seg=w/(cR.length||3);
+  cR.forEach(p=>{
+    budget(measW(v(p[0]),700,BT.cap,0),   seg-20);
+    budget(measW(v(p[1]),700,BT.lab,1.6), seg-14);
+  });
+  if(ckTeam.checked){
+    const half=w/2;
+    ["t1v","t2v"].forEach(i=>budget(measW(v(i),700,BT.cap,0),   half-34));
+    ["t1l","t2l"].forEach(i=>budget(measW(v(i),700,BT.lab,2.5), half-24));
+  }
+  return k;
+}
 /* Fit the stack to the space it is given: a little stretch, then spend the
    rest on gaps between boxes rather than inflating the boxes. */
 function fit(w,avail,maxStretch,maxExtraGap,list){
@@ -404,7 +426,7 @@ function fit(w,avail,maxStretch,maxExtraGap,list){
   BT=baseType(w);
   const nat=statsHeight(w,list);
   if(!nat){ return {nat:0,left:avail}; }
-  SC=Math.max(1,Math.min(maxStretch||1.25, avail/nat));
+  SC=Math.max(1,Math.min(maxStretch||1.25, avail/nat, widthHeadroom(w)));
   let used=nat*SC;
   const n=sectionCount(w,list);
   const gapRoom=(maxExtraGap===undefined?26:maxExtraGap);
